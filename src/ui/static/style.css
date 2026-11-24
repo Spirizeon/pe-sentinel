@@ -117,5 +117,40 @@ pre {
   border-radius: 6px; padding: 10px; font-size: 11px; color: #9fb4cf;
 }
 
+.criteria {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;
+  padding: 18px 32px 0;
+}
+@media (max-width: 1000px) { .criteria { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .criteria { grid-template-columns: 1fr; } }
+.criterion {
+  position: relative; border: 1px solid var(--border); border-radius: 8px;
+  background: linear-gradient(160deg, #0f1a28, #0b121c); padding: 14px 14px 12px;
+}
+.criterion-num { position: absolute; right: 12px; top: 10px; color: #29405a; font-size: 22px; font-weight: 700; }
+.criterion h3 { margin: 0 0 6px; font-size: 12px; color: var(--cyan); text-transform: uppercase; letter-spacing: .1em; }
+.criterion p { margin: 0 0 8px; font-size: 11px; color: var(--muted); min-height: 32px; }
+.link-btn {
+  border: 0; background: none; padding: 0; color: var(--violet);
+  font-family: inherit; font-size: 11px; cursor: pointer;
+}
+.link-btn:hover { color: var(--cyan); text-decoration: underline; }
+
+.proof-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+
+.table-scroll { max-height: 430px; overflow: auto; border: 1px solid var(--border); border-radius: 6px; }
+.feature-table td:nth-child(3) { color: var(--cyan); }
+.feature-table td:last-child { font-size: 11px; }
+
+.selected-summary {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  margin: 12px 0; padding: 10px; border: 1px solid #17556a;
+  background: #08202b; border-radius: 6px;
+}
+.summary-title { color: var(--cyan); font-size: 12px; margin-right: 6px; }
+.stat-card { display: flex; flex-direction: column; gap: 2px; padding: 4px 10px; border-left: 1px solid var(--border); }
+.stat-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.stat-value { color: var(--text); font-size: 13px; }
+
 footer { padding: 0 32px 28px; color: var(--muted); font-size: 11px; }
 footer ascii-art { font-size: 8px; line-height: 1.05; opacity: .7; }

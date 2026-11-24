@@ -21,6 +21,33 @@
     </div>
   </header>
 
+  <section class="criteria" id="criteria" aria-label="Pipeline criteria">
+    <article class="criterion">
+      <span class="criterion-num">01</span>
+      <h3>Feature extraction</h3>
+      <p id="criterion-features-text">64 static features · deterministic schema</p>
+      <button class="link-btn" data-scroll="feature-panel">view vector →</button>
+    </article>
+    <article class="criterion">
+      <span class="criterion-num">02</span>
+      <h3>Model comparison</h3>
+      <p id="criterion-models-text">5 models · 5-fold cross-validation</p>
+      <button class="link-btn" data-scroll="metrics-panel">view comparison →</button>
+    </article>
+    <article class="criterion">
+      <span class="criterion-num">03</span>
+      <h3>Explainability</h3>
+      <p id="criterion-explain-text">SHAP attribution + rule-based evidence</p>
+      <button class="link-btn" id="criterion-demo-btn">load demo →</button>
+    </article>
+    <article class="criterion">
+      <span class="criterion-num">04</span>
+      <h3>Evaluation</h3>
+      <p id="criterion-eval-text">Accuracy · F1 · false positives · inference time</p>
+      <button class="link-btn" id="criterion-metrics-btn">view scores →</button>
+    </article>
+  </section>
+
   <main class="layout">
     <section class="panel" id="scan-panel">
       <h2><span class="prompt">&gt;</span> scan a sample</h2>
@@ -59,6 +86,7 @@
         </div>
         <div class="gauge"><div id="gauge-fill" class="gauge-fill"></div></div>
         <p class="muted tiny">Probability is the model's malware score; threshold 0.50. Explanations describe this model, not ground truth.</p>
+        <div id="proof-badges" class="proof-badges"></div>
 
         <h3>What drove this prediction</h3>
         <table class="attrib-table">
@@ -81,15 +109,35 @@
     </section>
   </main>
 
+  <section class="panel wide" id="feature-panel">
+    <h2><span class="prompt">&gt;</span> extracted feature vector</h2>
+    <p class="muted" id="feature-summary">Load a sample to inspect all 64 extracted features.</p>
+    <div class="table-scroll">
+      <table class="feature-table">
+        <thead>
+          <tr><th>#</th><th>Feature</th><th>Value</th><th>Meaning</th></tr>
+        </thead>
+        <tbody id="feature-body"></tbody>
+      </table>
+    </div>
+  </section>
+
   <section class="panel wide" id="metrics-panel" hidden>
-    <h2><span class="prompt">&gt;</span> model comparison</h2>
+    <h2><span class="prompt">&gt;</span> model comparison &amp; evaluation</h2>
     <p class="muted" id="metrics-summary"></p>
-    <table class="metrics-table">
-      <thead>
-        <tr><th>Model</th><th>CV F1</th><th>Test acc</th><th>Test F1</th><th>FP</th><th>FPR</th><th>ms/sample</th></tr>
-      </thead>
-      <tbody id="metrics-body"></tbody>
-    </table>
+    <div id="selected-summary" class="selected-summary"></div>
+    <div class="table-scroll">
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>Model</th><th>CV acc</th><th>CV F1</th><th>Test acc</th><th>Test F1</th>
+            <th>Precision</th><th>Recall</th><th>ROC-AUC</th>
+            <th>TP</th><th>FP</th><th>FN</th><th>TN</th><th>FPR</th><th>ms/sample</th>
+          </tr>
+        </thead>
+        <tbody id="metrics-body"></tbody>
+      </table>
+    </div>
   </section>
 
   <footer>

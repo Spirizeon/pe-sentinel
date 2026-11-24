@@ -96,6 +96,15 @@ def explain_file(
         "explainer": explainer_kind,
         "baseline_log_odds": None if np.isnan(expected) else round(expected, 5),
         "top_attributions": attributions,
+        "feature_count": len(FEATURE_NAMES),
+        "feature_schema": [
+            {
+                "name": name,
+                "value": round(float(features.get(name, 0.0)), 4),
+                "description": FEATURE_DESCRIPTIONS.get(name, name),
+            }
+            for name in FEATURE_NAMES
+        ],
         "evidence": human_evidence(features),
         "raw_evidence": {
             "section_names": evidence.get("section_names", []),

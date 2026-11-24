@@ -55,6 +55,16 @@ the full list.
 `GeminiSetup.exe` is treated as benign, excluded from training, and kept only in
 the test split.
 
+## Web UI
+
+Open `./run.sh ui` → http://127.0.0.1:8000. The page has a four-card dashboard
+that makes the project criteria visible: feature extraction, model comparison,
+explainability, and evaluation. Upload a PE (or load the demo) to see the verdict,
+SHAP attributions, rule-based evidence, proof badges, and the full 64-feature
+vector. The metrics panel shows accuracy, F1, precision, recall, ROC-AUC,
+confusion-matrix counts, false positives, and inference time for all models.
+Uploads are parsed statically and deleted after analysis.
+
 ## Results from the committed run
 
 201 real benign PEs + 200 synthetic malware-like rows; 320 train / 81 test; seed

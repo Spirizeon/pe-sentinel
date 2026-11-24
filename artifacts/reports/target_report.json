@@ -94,6 +94,329 @@
       "description": "count of long base64-like blobs in strings"
     }
   ],
+  "feature_count": 64,
+  "feature_schema": [
+    {
+      "name": "file_size_log10",
+      "value": 7.1152,
+      "description": "log10 of the file size in bytes"
+    },
+    {
+      "name": "file_size_mb",
+      "value": 12.433,
+      "description": "file size in MiB"
+    },
+    {
+      "name": "pe32plus",
+      "value": 0.0,
+      "description": "PE32+ (64-bit) optional header"
+    },
+    {
+      "name": "machine_i386",
+      "value": 1.0,
+      "description": "target machine is x86"
+    },
+    {
+      "name": "machine_amd64",
+      "value": 0.0,
+      "description": "target machine is x86-64"
+    },
+    {
+      "name": "subsystem_gui",
+      "value": 1.0,
+      "description": "GUI subsystem"
+    },
+    {
+      "name": "subsystem_console",
+      "value": 0.0,
+      "description": "console subsystem"
+    },
+    {
+      "name": "timestamp_year",
+      "value": 2026.0,
+      "description": "year derived from the PE TimeDateStamp"
+    },
+    {
+      "name": "timestamp_anomaly",
+      "value": 0.0,
+      "description": "timestamp is implausible (pre-1990 or in the future)"
+    },
+    {
+      "name": "is_dll",
+      "value": 0.0,
+      "description": "IMAGE_FILE_DLL characteristic set"
+    },
+    {
+      "name": "is_signed",
+      "value": 1.0,
+      "description": "Authenticode security directory present"
+    },
+    {
+      "name": "dep_disabled",
+      "value": 0.0,
+      "description": "IMAGE_DLLCHARACTERISTICS_NX_COMPAT is not set"
+    },
+    {
+      "name": "aslr_disabled",
+      "value": 0.0,
+      "description": "IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE is not set"
+    },
+    {
+      "name": "no_seh",
+      "value": 0.0,
+      "description": "IMAGE_DLLCHARACTERISTICS_NO_SEH is set"
+    },
+    {
+      "name": "high_entropy_va",
+      "value": 0.0,
+      "description": "IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA is set"
+    },
+    {
+      "name": "entrypoint_in_code",
+      "value": 1.0,
+      "description": "entry point RVA falls inside a named code section"
+    },
+    {
+      "name": "entrypoint_section_idx",
+      "value": 0.0,
+      "description": "index of the section containing the entry point"
+    },
+    {
+      "name": "num_sections",
+      "value": 9.0,
+      "description": "number of PE sections"
+    },
+    {
+      "name": "num_writable_sections",
+      "value": 4.0,
+      "description": "sections with IMAGE_SCN_MEM_WRITE"
+    },
+    {
+      "name": "num_executable_sections",
+      "value": 2.0,
+      "description": "sections with IMAGE_SCN_MEM_EXECUTE"
+    },
+    {
+      "name": "num_wx_sections",
+      "value": 0.0,
+      "description": "sections writable and executable"
+    },
+    {
+      "name": "num_rwx_sections",
+      "value": 0.0,
+      "description": "sections readable, writable and executable"
+    },
+    {
+      "name": "num_high_entropy_sections",
+      "value": 0.0,
+      "description": "sections with Shannon entropy > 7.0 (packing indicator)"
+    },
+    {
+      "name": "num_empty_raw_sections",
+      "value": 0.0,
+      "description": "sections with virtual size but no raw data"
+    },
+    {
+      "name": "num_suspicious_section_names",
+      "value": 0.0,
+      "description": "section names matching known packer/crypter names"
+    },
+    {
+      "name": "num_unknown_section_names",
+      "value": 0.0,
+      "description": "section names outside a common allow-list"
+    },
+    {
+      "name": "max_section_entropy",
+      "value": 6.7382,
+      "description": "highest per-section Shannon entropy"
+    },
+    {
+      "name": "mean_section_entropy",
+      "value": 3.9567,
+      "description": "mean per-section Shannon entropy"
+    },
+    {
+      "name": "std_section_entropy",
+      "value": 2.8433,
+      "description": "standard deviation of section entropy"
+    },
+    {
+      "name": "total_raw_size_log10",
+      "value": 7.1145,
+      "description": "log10 of the sum of section raw sizes"
+    },
+    {
+      "name": "total_virtual_size_log10",
+      "value": 7.1177,
+      "description": "log10 of the sum of section virtual sizes"
+    },
+    {
+      "name": "raw_virtual_ratio",
+      "value": 0.9927,
+      "description": "raw size divided by virtual size"
+    },
+    {
+      "name": "overlay_ratio",
+      "value": 0.0014,
+      "description": "bytes appended after the last section divided by file size"
+    },
+    {
+      "name": "has_overlay",
+      "value": 1.0,
+      "description": "non-empty PE overlay present"
+    },
+    {
+      "name": "import_count_log10",
+      "value": 2.6385,
+      "description": "log10 of the number of imported API names"
+    },
+    {
+      "name": "import_dll_count",
+      "value": 18.0,
+      "description": "number of distinct imported DLLs"
+    },
+    {
+      "name": "import_inject",
+      "value": 0.0,
+      "description": "imports used for process injection / cross-process memory"
+    },
+    {
+      "name": "import_antidebug",
+      "value": 2.0,
+      "description": "anti-debugging / timing APIs"
+    },
+    {
+      "name": "import_network",
+      "value": 4.0,
+      "description": "networking and download APIs"
+    },
+    {
+      "name": "import_crypto",
+      "value": 0.0,
+      "description": "cryptography APIs"
+    },
+    {
+      "name": "import_persistence",
+      "value": 0.0,
+      "description": "registry/service persistence APIs"
+    },
+    {
+      "name": "import_file_ops",
+      "value": 7.0,
+      "description": "file system manipulation APIs"
+    },
+    {
+      "name": "import_dynamic_load",
+      "value": 5.0,
+      "description": "runtime DLL loading / address resolution APIs"
+    },
+    {
+      "name": "import_shell_exec",
+      "value": 2.0,
+      "description": "process creation APIs"
+    },
+    {
+      "name": "import_privilege",
+      "value": 4.0,
+      "description": "token and privilege manipulation APIs"
+    },
+    {
+      "name": "import_sleep",
+      "value": 1.0,
+      "description": "sleep / delay APIs"
+    },
+    {
+      "name": "import_native",
+      "value": 3.0,
+      "description": "low-level native/ntdll APIs"
+    },
+    {
+      "name": "export_count_log10",
+      "value": 0.301,
+      "description": "log10 of the number of exported symbols"
+    },
+    {
+      "name": "has_exports",
+      "value": 1.0,
+      "description": "export directory present"
+    },
+    {
+      "name": "resource_count_log10",
+      "value": 2.8235,
+      "description": "log10 of the number of resource entries"
+    },
+    {
+      "name": "resource_size_ratio",
+      "value": 0.6327,
+      "description": "resource directory size divided by file size"
+    },
+    {
+      "name": "has_resources",
+      "value": 1.0,
+      "description": "resource directory present"
+    },
+    {
+      "name": "has_debug",
+      "value": 1.0,
+      "description": "debug directory present"
+    },
+    {
+      "name": "has_tls",
+      "value": 1.0,
+      "description": "TLS directory present"
+    },
+    {
+      "name": "has_reloc",
+      "value": 1.0,
+      "description": "base relocation directory present"
+    },
+    {
+      "name": "str_url",
+      "value": 72.0,
+      "description": "count of http(s) URLs in ASCII/UTF-16 strings"
+    },
+    {
+      "name": "str_ip",
+      "value": 22.0,
+      "description": "count of dotted-quad IP addresses in strings"
+    },
+    {
+      "name": "str_registry",
+      "value": 0.0,
+      "description": "count of registry key references in strings"
+    },
+    {
+      "name": "str_path",
+      "value": 29.0,
+      "description": "count of filesystem path patterns in strings"
+    },
+    {
+      "name": "str_powershell",
+      "value": 0.0,
+      "description": "count of PowerShell / encoded-command indicators"
+    },
+    {
+      "name": "str_cmd",
+      "value": 0.0,
+      "description": "count of cmd.exe references"
+    },
+    {
+      "name": "str_script_ext",
+      "value": 95.0,
+      "description": "count of executable/script file extensions in strings"
+    },
+    {
+      "name": "str_base64",
+      "value": 0.0,
+      "description": "count of long base64-like blobs in strings"
+    },
+    {
+      "name": "parse_error",
+      "value": 0.0,
+      "description": "PE parser raised an error for this file"
+    }
+  ],
   "evidence": [
     "2 import(s) in the antidebug API category",
     "4 import(s) in the network API category",
