@@ -33,10 +33,16 @@ function setBusy(busy) {
 }
 
 function renderFeatures(schema) {
-  $('feature-summary').textContent = schema.length
-    ? `${schema.length} features extracted from this sample. Dual-use APIs are excluded from high-signal categories.`
-    : 'No sample loaded yet.';
-  $('criterion-features-text').textContent = `${schema.length || 64} static features · deterministic schema`;
+  const panel = $('feature-panel');
+  if (!schema.length) {
+    panel.hidden = true;
+    $('criterion-features-text').textContent = '';
+    return;
+  }
+  panel.hidden = false;
+  $('feature-summary').textContent =
+    `${schema.length} features extracted from this sample. Dual-use APIs are excluded from high-signal categories.`;
+  $('criterion-features-text').textContent = `${schema.length} static features · deterministic schema`;
   const tbody = $('feature-body');
   tbody.replaceChildren();
   schema.forEach((item, index) => {

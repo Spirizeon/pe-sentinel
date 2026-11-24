@@ -25,25 +25,25 @@
     <article class="criterion">
       <span class="criterion-num">01</span>
       <h3>Feature extraction</h3>
-      <p id="criterion-features-text">64 static features · deterministic schema</p>
+      <p id="criterion-features-text"></p>
       <button class="link-btn" data-scroll="feature-panel">view vector →</button>
     </article>
     <article class="criterion">
       <span class="criterion-num">02</span>
       <h3>Model comparison</h3>
-      <p id="criterion-models-text">5 models · 5-fold cross-validation</p>
+      <p id="criterion-models-text"></p>
       <button class="link-btn" data-scroll="metrics-panel">view comparison →</button>
     </article>
     <article class="criterion">
       <span class="criterion-num">03</span>
       <h3>Explainability</h3>
-      <p id="criterion-explain-text">SHAP attribution + rule-based evidence</p>
+      <p id="criterion-explain-text"></p>
       <button class="link-btn" id="criterion-demo-btn">load demo →</button>
     </article>
     <article class="criterion">
       <span class="criterion-num">04</span>
       <h3>Evaluation</h3>
-      <p id="criterion-eval-text">Accuracy · F1 · false positives · inference time</p>
+      <p id="criterion-eval-text"></p>
       <button class="link-btn" id="criterion-metrics-btn">view scores →</button>
     </article>
   </section>
@@ -75,8 +75,7 @@
     <section class="panel" id="result-panel">
       <h2><span class="prompt">&gt;</span> verdict</h2>
       <div id="empty-result" class="empty">
-        <p>No scan yet.</p>
-        <p class="muted">Upload a PE file or load the held-out demo sample to see a prediction with its evidence.</p>
+        <p class="muted">No scan yet.</p>
       </div>
 
       <div id="result" hidden>
@@ -109,9 +108,9 @@
     </section>
   </main>
 
-  <section class="panel wide" id="feature-panel">
+  <section class="panel wide" id="feature-panel" hidden>
     <h2><span class="prompt">&gt;</span> extracted feature vector</h2>
-    <p class="muted" id="feature-summary">Load a sample to inspect all 64 extracted features.</p>
+    <p class="muted" id="feature-summary"></p>
     <div class="table-scroll">
       <table class="feature-table">
         <thead>
