@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PE Sentinel — explainable PE classifier</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <!-- ascii.rest custom elements: <ascii-art> and <ascii-banner> -->
+  <script type="module" src="https://ascii.rest/ascii.js"></script>
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="masthead">
+    <ascii-banner text="PE SENTINEL" color="#22d3ee,#a78bfa" shadow="rounded"></ascii-banner>
+    <p class="tagline">static PE triage · per-prediction evidence · SHAP attribution</p>
+    <div class="status">
+      <span id="model-badge" class="badge badge-wait">checking model…</span>
+      <span class="badge badge-dim">no code execution</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel" id="scan-panel">
+      <h2><span class="prompt">&gt;</span> scan a sample</h2>
+      <label class="dropzone" id="dropzone" for="file-input">
+        <input id="file-input" type="file" accept=".exe,.dll,.sys,.scr,.msi,.bin" />
+        <div class="dropzone-art"><ascii-art piece="donut" label="waiting for a PE file"></ascii-art></div>
+        <strong id="dropzone-title">Drop a Windows PE file here</strong>
+        <span class="muted">or click to browse · max 100 MB · parsed statically, never run</span>
+      </label>
+
+      <div class="actions">
+        <button id="analyze-btn" class="btn btn-primary" disabled>Analyze file</button>
+        <button id="demo-btn" class="btn">Load demo (GeminiSetup.exe)</button>
+        <button id="metrics-btn" class="btn">Model metrics</button>
+      </div>
+
+      <div id="loader" class="loader" hidden>
+        <ascii-art piece="spinners" options='{"names":["dots","scan"],"labels":false}' label="analyzing"></ascii-art>
+        <span>extracting features → predicting → explaining</span>
+      </div>
+
+      <p id="error-box" class="error" hidden></p>
+    </section>
+
+    <section class="panel" id="result-panel">
+      <h2><span class="prompt">&gt;</span> verdict</h2>
+      <div id="empty-result" class="empty">
+        <p>No scan yet.</p>
+        <p class="muted">Upload a PE file or load the held-out demo sample to see a prediction with its evidence.</p>
+      </div>
+
+      <div id="result" hidden>
+        <div class="verdict-row">
+          <span id="verdict" class="verdict">—</span>
+          <span id="probability" class="probability">—</span>
+        </div>
+        <div class="gauge"><div id="gauge-fill" class="gauge-fill"></div></div>
+        <p class="muted tiny">Probability is the model's malware score; threshold 0.50. Explanations describe this model, not ground truth.</p>
+
+        <h3>What drove this prediction</h3>
+        <table class="attrib-table">
+          <thead>
+            <tr><th>Feature</th><th>Value</th><th>SHAP</th><th>Pushes</th></tr>
+          </thead>
+          <tbody id="attrib-body"></tbody>
+        </table>
+
+        <h3>Static evidence</h3>
+        <ul id="evidence-list" class="evidence"></ul>
+
+        <details>
+          <summary>Raw PE metadata</summary>
+          <pre id="raw-evidence"></pre>
+        </details>
+
+        <p class="muted tiny" id="file-meta"></p>
+      </div>
+    </section>
+  </main>
+
+  <section class="panel wide" id="metrics-panel" hidden>
+    <h2><span class="prompt">&gt;</span> model comparison</h2>
+    <p class="muted" id="metrics-summary"></p>
+    <table class="metrics-table">
+      <thead>
+        <tr><th>Model</th><th>CV F1</th><th>Test acc</th><th>Test F1</th><th>FP</th><th>FPR</th><th>ms/sample</th></tr>
+      </thead>
+      <tbody id="metrics-body"></tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>Demo dataset: real benign PE files + synthetic malware-like feature variants. Metrics are not real-world detection rates.</p>
+    <ascii-art piece="progress-bar" options='{"labels":["extract","predict","explain","done"]}'></ascii-art>
+  </footer>
+</body>
+</html>

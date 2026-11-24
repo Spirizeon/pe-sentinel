@@ -1,0 +1,231 @@
+{
+  "file": "/home/berzi/Downloads/GeminiSetup.exe",
+  "sha256": "3f071f4eeb4dd0a339ce444c810b1bfb7e4075831ddd7810fe0bdfe17de41cbd",
+  "size_bytes": 13036976,
+  "model": "random_forest",
+  "prediction": "benign",
+  "malware_probability": 0.397428,
+  "threshold": 0.5,
+  "explainer": "TreeExplainer",
+  "baseline_log_odds": 0.5,
+  "top_attributions": [
+    {
+      "feature": "import_antidebug",
+      "value": 2.0,
+      "shap_value": 0.09567,
+      "direction": "towards_malware",
+      "description": "anti-debugging / timing APIs"
+    },
+    {
+      "feature": "num_high_entropy_sections",
+      "value": 0.0,
+      "shap_value": -0.0605,
+      "direction": "towards_benign",
+      "description": "sections with Shannon entropy > 7.0 (packing indicator)"
+    },
+    {
+      "feature": "str_powershell",
+      "value": 0.0,
+      "shap_value": -0.05413,
+      "direction": "towards_benign",
+      "description": "count of PowerShell / encoded-command indicators"
+    },
+    {
+      "feature": "import_dynamic_load",
+      "value": 5.0,
+      "shap_value": 0.03902,
+      "direction": "towards_malware",
+      "description": "runtime DLL loading / address resolution APIs"
+    },
+    {
+      "feature": "import_inject",
+      "value": 0.0,
+      "shap_value": -0.02774,
+      "direction": "towards_benign",
+      "description": "imports used for process injection / cross-process memory"
+    },
+    {
+      "feature": "aslr_disabled",
+      "value": 0.0,
+      "shap_value": -0.02143,
+      "direction": "towards_benign",
+      "description": "IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE is not set"
+    },
+    {
+      "feature": "file_size_log10",
+      "value": 7.1152,
+      "shap_value": 0.02046,
+      "direction": "towards_malware",
+      "description": "log10 of the file size in bytes"
+    },
+    {
+      "feature": "max_section_entropy",
+      "value": 6.7382,
+      "shap_value": -0.01922,
+      "direction": "towards_benign",
+      "description": "highest per-section Shannon entropy"
+    },
+    {
+      "feature": "num_rwx_sections",
+      "value": 0.0,
+      "shap_value": -0.0182,
+      "direction": "towards_benign",
+      "description": "sections readable, writable and executable"
+    },
+    {
+      "feature": "num_wx_sections",
+      "value": 0.0,
+      "shap_value": -0.01756,
+      "direction": "towards_benign",
+      "description": "sections writable and executable"
+    },
+    {
+      "feature": "import_count_log10",
+      "value": 2.6385,
+      "shap_value": 0.01573,
+      "direction": "towards_malware",
+      "description": "log10 of the number of imported API names"
+    },
+    {
+      "feature": "str_base64",
+      "value": 0.0,
+      "shap_value": -0.01384,
+      "direction": "towards_benign",
+      "description": "count of long base64-like blobs in strings"
+    }
+  ],
+  "evidence": [
+    "2 import(s) in the antidebug API category",
+    "4 import(s) in the network API category",
+    "2 import(s) in the shell_exec API category",
+    "5 import(s) in the dynamic_load API category",
+    "72 embedded URL string(s)",
+    "22 embedded IP address(es)"
+  ],
+  "raw_evidence": {
+    "section_names": [
+      ".text",
+      ".rdata",
+      ".data",
+      ".fptable",
+      ".tls",
+      "CPADinfo",
+      "malloc_h",
+      ".rsrc",
+      ".reloc"
+    ],
+    "imported_dlls": [
+      "advapi32.dll",
+      "api-ms-win-core-synch-l1-2-0.dll",
+      "api-ms-win-core-winrt-l1-1-0.dll",
+      "bcryptprimitives.dll",
+      "dbghelp.dll",
+      "gdi32.dll",
+      "kernel32.dll",
+      "ntdll.dll",
+      "ole32.dll",
+      "oleaut32.dll",
+      "secur32.dll",
+      "shell32.dll",
+      "shlwapi.dll",
+      "user32.dll",
+      "userenv.dll",
+      "winhttp.dll",
+      "winmm.dll",
+      "wtsapi32.dll"
+    ],
+    "top_import_categories": [
+      {
+        "category": "antidebug",
+        "count": 2,
+        "apis": [
+          "isdebuggerpresent",
+          "ntqueryinformationprocess"
+        ]
+      },
+      {
+        "category": "dynamic_load",
+        "count": 5,
+        "apis": [
+          "freelibrary",
+          "getprocaddress",
+          "loadlibraryexa",
+          "loadlibraryexw",
+          "loadlibraryw"
+        ]
+      },
+      {
+        "category": "file_ops",
+        "count": 7,
+        "apis": [
+          "copyfilew",
+          "createfilea",
+          "createfilew",
+          "deletefilew",
+          "findfirstfilew",
+          "findnextfilew",
+          "movefilew"
+        ]
+      },
+      {
+        "category": "native",
+        "count": 3,
+        "apis": [
+          "ntdeletekey",
+          "ntqueryobject",
+          "rtlgetversion"
+        ]
+      },
+      {
+        "category": "network",
+        "count": 4,
+        "apis": [
+          "winhttpconnect",
+          "winhttpopen",
+          "winhttpreaddata",
+          "winhttpsendrequest"
+        ]
+      },
+      {
+        "category": "privilege",
+        "count": 4,
+        "apis": [
+          "adjusttokenprivileges",
+          "duplicatetokenex",
+          "impersonateloggedonuser",
+          "openprocesstoken"
+        ]
+      },
+      {
+        "category": "shell_exec",
+        "count": 2,
+        "apis": [
+          "createprocessw",
+          "shellexecuteexw"
+        ]
+      },
+      {
+        "category": "sleep",
+        "count": 1,
+        "apis": [
+          "sleep"
+        ]
+      }
+    ],
+    "string_indicators": {
+      "url": 72,
+      "ip": 22,
+      "registry": 0,
+      "path": 29,
+      "powershell": 0,
+      "cmd_shell": 1,
+      "script_ext": 95,
+      "base64_blob": 200
+    },
+    "overlay_bytes": 18864,
+    "notes": [
+      "PE TimeDateStamp roughly maps to year 2026"
+    ]
+  },
+  "interpretation_note": "A positive SHAP value raises the model's malware score relative to the baseline; a negative value lowers it. Attributions explain this model on this synthetic dataset, not ground-truth maliciousness."
+}
