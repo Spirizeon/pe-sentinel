@@ -39,8 +39,8 @@ def parser() -> argparse.ArgumentParser:
     run = sub.add_parser("run-all", help="build dataset, train, evaluate, explain the target")
     common(run)
     ui = sub.add_parser("ui", help="launch the ascii.rest-styled web UI")
-    ui.add_argument("--host", default="127.0.0.1")
-    ui.add_argument("--port", type=int, default=8000)
+    ui.add_argument("--host", default=None, help="bind address (default: HOST env or 127.0.0.1)")
+    ui.add_argument("--port", type=int, default=None, help="port (default: PORT env or 8000)")
     ui.add_argument("--artifacts-dir", default="artifacts")
     return p
 

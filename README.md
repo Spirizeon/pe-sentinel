@@ -76,6 +76,21 @@ pre-declared selection rule is CV F1, so random forest was chosen.
 synthetic feature-space variants, so these metrics show that the pipeline works,
 not real-world detection performance.
 
+## Deploying to Render
+
+`render.yaml` is the Blueprint Render reads; `render.json` is the same config in
+JSON form for reference. Render's Blueprint format is YAML, so use `render.yaml`
+when creating the service.
+
+1. Push this repo to GitHub (already done at
+   `https://github.com/Spirizeon/pe-sentinel`).
+2. In Render, choose **New → Blueprint** and select that repository.
+3. Render detects `render.yaml` and creates the `pe-sentinel` web service.
+4. The health check is `/api/health`.
+
+The committed `artifacts/` directory means no training step is needed at deploy
+time. Uploads are still parsed statically and deleted after each request.
+
 ## Documentation
 
 - [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md) — pipeline architecture, feature

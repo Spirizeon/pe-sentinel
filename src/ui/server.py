@@ -7,6 +7,7 @@ in a temporary file, and are deleted immediately after analysis.
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -94,7 +95,13 @@ def create_app(artifacts_dir: str | Path = "artifacts") -> Flask:
     return app
 
 
-def run_server(host: str = "127.0.0.1", port: int = 8000, artifacts_dir: str | Path = "artifacts") -> None:
+def run_server(
+    host: str | None = None,
+    port: int | None = None,
+    artifacts_dir: str | Path = "artifacts",
+) -> None:
+    host = host or os.environ.get("HOST", "127.0.0.1")
+    port = int(port or os.environ.get("PORT", "8000"))
     app = create_app(artifacts_dir)
     print(f"[ui] http://{host}:{port}  (ascii.rest CDN loaded in the browser)")
     app.run(host=host, port=port, debug=False)
