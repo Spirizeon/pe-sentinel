@@ -1,106 +1,88 @@
 # How it works
 
-This page explains the pipeline end to end: what is extracted, how the dataset
-is built, how models are compared, how predictions are explained, and what the
-web UI does.
+This page explains the pipeline end to end: what is extracted, how the labelled
+dataset is encoded, how models are compared, how predictions are explained, and
+what the web UI does.
 
 ## Data flow
 
 ```
-  PE file (never executed)
-        │
-        ▼
-  src/pe_features.py ──► 64 numeric features + evidence dict
-        │
-        ├──► src/dataset.py ──► data/dataset.csv + data/manifest.json
-        │                         (real benign + synthetic malware-like rows)
-        ▼
+  data/ficheiro_final.csv (real labelled rows)
+         │
+         ▼
+  src/dataset.py ──► data/dataset.csv + data/manifest.json
+         │            (27 encoded features, labels, train/test split)
+         ▼
   src/models.py ────────► artifacts/model.joblib + artifacts/metrics.json
-        │                 (5 models, 5-fold CV, held-out test metrics)
-        ▼
+         │                 (5 models, 5-fold CV, held-out test metrics)
+         ▼
+  file upload ──► src/pe_features.py ──► 27 features + evidence dict
+         │
+         ▼
   src/explain.py ───────► artifacts/reports/*.json
-        │                 (probability, SHAP values, rule-based evidence)
-        ▼
+         │                 (probability, SHAP values, rule-based evidence)
+         ▼
   src/ui/server.py ─────► http://127.0.0.1:8000
                           (ascii.rest banner/spinner/donut + HTML controls)
 ```
 
-## 1. Static feature extraction
+## 1. Feature schema and extraction
 
-`src/pe_features.py` reads the file bytes and parses the PE headers with
-`pefile`. It does **not** run the executable, load its DLLs, or emulate code.
+`src/pe_features.py` defines the 27 fixed-order columns (`FEATURE_NAMES`) that
+the model was trained on. The same module encodes the CSV and extracts features
+from uploaded files, so a value has the same meaning on both sides.
 
-### Feature groups (64 fixed-order columns)
-
-| Group | Examples |
+| Group | Columns |
 | --- | --- |
-| File/header | size, PE32 vs PE32+, machine, subsystem, DLL flag, Authenticode directory, build timestamp |
-| Security flags | DEP/NX disabled, ASLR/DYNAMIC_BASE disabled, NO_SEH, high-entropy VA |
-| Sections | count, entropy (Shannon bits/byte), writable/executable/RWX counts, empty raw sections, packer-like names |
-| Entry point | whether the EP falls in an executable section, section index |
-| Imports | total count, DLL count, and 11 API categories |
-| Exports / resources / overlay | export count, resource entries and size, appended overlay bytes |
-| Strings | counts of URLs, IPs, registry keys, paths, PowerShell indicators, `cmd.exe`, script extensions, base64-like blobs |
+| Byte statistics | `Size`, `Entropy`, `entropy`, `Non-Printable Exists`, `Non-Printable Count`, `unicode_strings` |
+| PE headers | `header_match`, `creation_time`, `arch`, `extension`, `encoding`, `Permissions` |
+| Sections / resources | `num_text_sections`, `num_custom_sections`, `Data Sections Count`, `rsrc`, `digital_signature` |
+| Packer / APIs / strings | `packer`, `Packed Status`, `Suspicious Functions Count`, `suspicious_strings`, `suspicious_strings_found`, `suspicious_encoding` |
+| Opcode statistics | `unique_instruction_count`, `average_opcode_count`, `total_instruction_count`, `instruction_diversity_ratio` |
 
-The import categories are: `inject`, `antidebug`, `network`, `crypto`,
-`persistence`, `file_ops`, `dynamic_load`, `shell_exec`, `privilege`, `sleep`,
-`native`.
+Files are never executed. PE headers are parsed with `pefile`; the remaining
+values come from byte-level statistics and string searches. Non-PE files are
+accepted by the extractor: `header_match` becomes 0 and all PE-specific fields
+are zero.
 
-**Dual-use APIs were deliberately excluded** from the high-signal categories:
-`OpenProcess`, `ReadProcessMemory`, `GetTickCount` and `QueryPerformanceCounter`
-are common in legitimate installers and games. Including them caused false
-positives on the held-out safe sample without adding real detection signal.
+Categorical columns are **not** factorized at load time. Fixed vocabularies in
+`VOCABULARIES` map values to integers (e.g. `packer`: Unknown=0, UPX=1,
+MinPack=2; `arch`: x86=0, x86_64=1, not_pe=2, …). Unknown values go into a
+stable `other` bucket. `Yes`/`No` and `TRUE`/`FALSE` become 1/0. The
+`suspicious_strings_found` list from the CSV is encoded as its number of
+entries.
 
-Every feature has a human-readable definition in
-`FEATURE_DESCRIPTIONS`, and `human_evidence()` turns raw values into short
-statements such as "2 sections have entropy > 7.0 (possible packing)".
+The opcode columns cannot be reproduced without a disassembler dependency, so
+extraction emits 0.0 for them. They are kept in the schema because they exist
+in the corpus, and they are labelled as unavailable in the UI and
+`FEATURE_DESCRIPTIONS`.
 
-The feature order is fixed in `FEATURE_NAMES`. Reordering it requires retraining
-and a schema-version bump.
+`creation_time` and `Permissions` stay in the report schema but are **excluded
+from model input** (`NON_MODEL_FEATURES`). Every benign corpus row is stamped
+2025-04-24 with permission bits `777`, so these columns describe the collection
+environment rather than file behaviour: they gave near-perfect CV scores and
+pushed out-of-range uploads toward "malicious". The model uses the remaining
+25 columns; the full 27-column vector is still shown for auditing.
 
 ## 2. Dataset construction
 
-`src/dataset.py::build_dataset` creates a deterministic dataset (default seed
-42).
+`src/dataset.py::build_dataset` reads `data/ficheiro_final.csv` (override with
+`--csv`). There are **no synthetic rows**.
 
-### Benign class (real files)
+- All 1,237 labelled rows are used — 911 `.exe`, 232 `.elf`, and smaller groups
+  of `.dll`, scripts, archives and other formats.
+- Label 0 is benign (703 rows), label 1 is malicious (534 rows), taken from the
+  `classification` column.
+- Each column is encoded with `pe_features.encode_value`; missing values become
+  0. The result is written to `data/dataset.csv` with `label`, `source`,
+  `source_path`, `sha256` and `split` metadata.
+- Rows are split 80/20 with a seed-stratified `train_test_split` (989 train /
+  248 test at seed 42).
+- `data/manifest.json` records the source CSV path, row and class counts, split
+  counts, feature list and disclaimer.
 
-- Source: PE files (`.exe`, `.dll`) under the local Wine/Proton runtime, by
-  default `/home/berzi/.local/share/Steam/steamapps/common/Proton - Experimental/files/lib/wine`.
-- Paths are sorted, shuffled with the seed, and sampled up to `--n-benign`.
-- Files larger than 40 MiB are skipped.
-- The target file (`GeminiSetup.exe`) is **removed from this pool** and appended
-  to the test split only. Its SHA-256 is recorded in the manifest.
-
-### Malicious class (synthetic, safe)
-
-No malware is fetched, generated, or run. For each malicious row, a random
-benign feature row is copied and mutated in **feature space** with seeded
-patterns:
-
-- `strong` (55%): packing, RWX sections, injection APIs, networking,
-  persistence, anti-debug, crypto, shell execution, overlay, suspicious strings,
-  disabled security flags, abnormal entry point
-- `medium` (30%): a smaller subset of those
-- `weak` (15%): 1–2 subtle indicators only, intentionally overlapping benign
-  space
-
-Small Gaussian jitter is applied to make the task non-trivial. The weak rows
-and benign overlap are what produce the handful of test errors.
-
-### Benign look-alikes
-
-About 22% of benign rows are augmented with generic installer/updater traits —
-signed, many embedded URLs/IPs, service and registry imports, large resources —
-using domain knowledge only. This prevents the model from learning the naive
-rule "URLs or service APIs means malware". The remaining benign rows get mild
-noise. This is why the held-out installer is classified correctly.
-
-### Splits
-
-Rows are shuffled with the seed, then split 80/20 into train/test. The target
-row is forced into test. `data/manifest.json` records counts, seed, source root,
-target hash, and the explicit disclaimer.
+`GeminiSetup.exe` is not part of the corpus. It is only a convenient demo file
+for `predict`/`run-all`; no label is attached to its report.
 
 ## 3. Model comparison and selection
 
@@ -131,14 +113,18 @@ On the held-out test split the report records:
 - **Inference time** — median wall-clock for a batch prediction divided by the
   number of rows, plus a loop of up to 200 single-row `predict_proba` calls
 
-These numbers are measured on the synthetic dataset and are only a demonstration
-of the machinery.
+The committed run scores 0.980 accuracy / 0.977 F1 for the selected model on a
+248-row test split. An earlier run that included `creation_time` and
+`Permissions` scored 1.000; those columns encoded the collection environment
+(uniform timestamps and permission bits), so they are now reported but excluded
+from the model. These figures demonstrate the machinery on the supplied data;
+they are **not** estimates of detection performance on new samples.
 
 ## 5. Explaining a prediction
 
 `src/explain.py::explain_file`:
 
-1. Extracts features for the file and builds the 64-column row.
+1. Extracts the 27 features for the file; the model row uses the 25 non-artifact columns.
 2. Runs `predict_proba` to get the malware probability (threshold 0.50).
 3. Applies SHAP:
    - `TreeExplainer` for random forest, extra trees, histogram GB
@@ -149,23 +135,27 @@ of the machinery.
 
 **Interpretation:** a positive SHAP value pushes the score toward "malicious"
 relative to the model baseline; a negative one pushes toward "benign". The
-evidence list is rule-based and can be checked against the PE metadata without
-trusting the model.
+evidence list is rule-based and can be checked against the extracted values
+without trusting the model.
 
 Example output shape:
 
 ```json
 {
   "prediction": "benign",
-  "malware_probability": 0.397428,
-  "model": "random_forest",
+  "malware_probability": 0.205856,
+  "model": "hist_gradient_boosting",
   "top_attributions": [
-    {"feature": "import_antidebug", "shap_value": 0.09567,
-     "direction": "towards_malware", "description": "anti-debugging / timing APIs"}
+    {"feature": "average_opcode_count", "shap_value": 3.91678,
+     "direction": "towards_malware", "description": "mean opcode count (unavailable in this build; encoded as 0)"}
   ],
-  "evidence": ["2 import(s) in the antidebug API category"]
+  "evidence": ["PE header parsed; architecture x86, extension .exe"]
 }
 ```
+
+The demo installer comes out benign once the collection-artifact columns are
+excluded. It is still unlabelled, so the verdict demonstrates the explanation
+path rather than ground truth.
 
 ## 6. Web UI
 
@@ -179,9 +169,10 @@ Example output shape:
 | `GET /api/target-report` | saved demo report |
 | `POST /api/predict` | multipart upload → prediction report |
 
-Uploaded files are restricted to PE-like extensions and 100 MiB, saved in a
-temporary directory, parsed statically, and deleted immediately. Nothing is
-executed.
+Uploads are restricted to PE-like extensions and 100 MiB, saved in a temporary
+directory, parsed statically, and deleted immediately. Nothing is executed.
+The model schema also supports non-PE rows from the corpus; the upload filter
+keeps the browser demo focused on Windows executables.
 
 The page uses **ascii.rest** custom elements loaded from
 `https://ascii.rest/ascii.js`:
@@ -199,8 +190,8 @@ script; the classifier itself works offline via the CLI.
 
 | File | Responsibility |
 | --- | --- |
-| `src/pe_features.py` | feature schema, PE parser, string counters, evidence |
-| `src/dataset.py` | deterministic dataset + synthetic variants + manifest |
+| `src/pe_features.py` | 27-feature schema, encoding vocabularies, extraction, evidence |
+| `src/dataset.py` | labelled-corpus loader, encoded CSV + manifest |
 | `src/models.py` | model pipelines, CV, held-out evaluation, artefact saving |
 | `src/explain.py` | SHAP + rule-based evidence + JSON report |
 | `src/cli.py` | command line entry point |
@@ -210,29 +201,32 @@ script; the classifier itself works offline via the CLI.
 
 ## 8. Reproducibility
 
-- All randomness uses `--seed` (default 42): file sampling, splits, synthetic
-  mutations and model initialisation.
-- `data/manifest.json` records the source root, seed, counts and target hash.
-- `FEATURE_NAMES` fixes the schema; `artifacts/model.joblib` stores the feature
-  list and training rows alongside the pipeline.
+- The seed (default 42) controls the train/test split and model initialisation;
+  there is no random dataset generation.
+- `data/ficheiro_final.csv` is the committed source of truth;
+  `data/manifest.json` records its path, counts and feature list.
+- `FEATURE_NAMES` and `VOCABULARIES` fix the schema;
+  `artifacts/model.joblib` stores the feature list and training rows alongside
+  the pipeline.
 - Dependency versions are in `requirements.txt`; this run used Python 3.14,
   numpy 2.5, pandas 3.1, scikit-learn 1.9, shap 0.54, pefile 2024.8.26.
 
-## 9. Limitations and using real data
+## 9. Limitations and using another corpus
 
-The synthetic labels make high scores expected. Do not deploy this model as a
-malware detector.
+Do not deploy this model as a malware detector. The corpus is small, its labels
+are correlated with collection timestamps, and the UI's opcode columns are
+empty placeholders.
 
-To use real labelled data:
+To use different labelled data:
 
-1. Replace `build_dataset` with a loader for a curated corpus (e.g. EMBER
-   features or internal sandbox-labelled samples). Keep the exact
-   `FEATURE_NAMES` schema or retrain with a new schema version.
-2. Deduplicate by SHA-256 and split **chronologically** to avoid leakage from
-   near-duplicate samples.
-3. Calibrate probabilities on a benign-heavy validation set; tune the decision
-   threshold to meet a false-positive budget.
-4. Add behavioral features (process tree, network destinations, file-system
-   traces) for samples where static analysis is inconclusive.
-5. Log every report, hash the model artefact, and route uncertain scores to a
-   human reviewer.
+1. Replace `data/ficheiro_final.csv` with a CSV containing the 27 columns in
+   `FEATURE_NAMES` plus `classification` and `sha256`, or extend the schema and
+   retrain with a schema-version bump.
+2. Use `encode_value` for categorical columns so training and inference agree;
+   avoid per-run `factorize`.
+3. Deduplicate by SHA-256 and split chronologically to avoid leakage from
+   near-duplicate or same-batch samples.
+4. Calibrate probabilities on a benign-heavy validation set and tune the
+   decision threshold to a false-positive budget.
+5. Add real opcode/behavioral features where static indicators are inconclusive,
+   and route uncertain scores to a human reviewer.

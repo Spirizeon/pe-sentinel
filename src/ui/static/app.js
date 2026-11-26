@@ -41,7 +41,7 @@ function renderFeatures(schema) {
   }
   panel.hidden = false;
   $('feature-summary').textContent =
-    `${schema.length} features extracted from this sample. Dual-use APIs are excluded from high-signal categories.`;
+    `${schema.length} features encoded with the ficheiro_final.csv schema. 25 feed the model; timestamp/permissions are reported only.`;
   $('criterion-features-text').textContent = `${schema.length} static features · deterministic schema`;
   const tbody = $('feature-body');
   tbody.replaceChildren();

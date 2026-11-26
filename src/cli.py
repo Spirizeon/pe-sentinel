@@ -6,7 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .dataset import DEFAULT_BENIGN_ROOT, SEED, build_dataset
+from .dataset import DEFAULT_SOURCE_CSV, SEED, build_dataset
 from .explain import explain_file
 from .models import train_and_evaluate
 
@@ -20,24 +20,22 @@ def parser() -> argparse.ArgumentParser:
     def common(sp: argparse.ArgumentParser) -> None:
         sp.add_argument("--data-dir", default="data", help="directory for dataset.csv / manifest.json")
         sp.add_argument("--artifacts-dir", default="artifacts", help="directory for model and reports")
-        sp.add_argument("--target", default=str(DEFAULT_TARGET), help="PE file to hold out and explain")
-        sp.add_argument("--benign-root", default=str(DEFAULT_BENIGN_ROOT))
-        sp.add_argument("--n-benign", type=int, default=900)
-        sp.add_argument("--n-malicious", type=int, default=900)
+        sp.add_argument("--csv", default=str(DEFAULT_SOURCE_CSV),
+                        help="labelled corpus (default: data/ficheiro_final.csv)")
         sp.add_argument("--seed", type=int, default=SEED)
-        sp.add_argument("--jobs", type=int, default=-1)
 
-    common(sub.add_parser("build-dataset", help="extract real benign features + synthetic malicious rows"))
+    common(sub.add_parser("build-dataset", help="encode the labelled CSV into dataset.csv"))
     train = sub.add_parser("train", help="compare models and save the best pipeline")
     train.add_argument("--data-dir", default="data")
     train.add_argument("--artifacts-dir", default="artifacts")
     train.add_argument("--seed", type=int, default=SEED)
-    predict = sub.add_parser("predict", help="predict and explain one PE file")
+    predict = sub.add_parser("predict", help="predict and explain one file")
     predict.add_argument("--artifacts-dir", default="artifacts")
-    predict.add_argument("--target", default=str(DEFAULT_TARGET))
+    predict.add_argument("--target", default=str(DEFAULT_TARGET), help="file to explain")
     predict.add_argument("--output", default=None)
     run = sub.add_parser("run-all", help="build dataset, train, evaluate, explain the target")
     common(run)
+    run.add_argument("--target", default=str(DEFAULT_TARGET), help="file to explain")
     ui = sub.add_parser("ui", help="launch the ascii.rest-styled web UI")
     ui.add_argument("--host", default=None, help="bind address (default: HOST env or 127.0.0.1)")
     ui.add_argument("--port", type=int, default=None, help="port (default: PORT env or 8000)")
@@ -51,25 +49,13 @@ def main() -> None:
     artifacts_dir = Path(getattr(args, "artifacts_dir", "artifacts"))
 
     if args.command in {"build-dataset", "run-all"}:
-        manifest = build_dataset(
-            out_dir=data_dir,
-            benign_root=Path(args.benign_root),
-            target=Path(args.target),
-            n_benign=args.n_benign,
-            n_malicious=args.n_malicious,
-            seed=args.seed,
-            n_jobs=args.jobs,
-        )
-        target_sha = manifest["target_sha256"]
-    else:
-        target_sha = None
+        build_dataset(out_dir=data_dir, csv_path=Path(args.csv), seed=args.seed)
 
     if args.command in {"train", "run-all"}:
         report = train_and_evaluate(
             csv_path=data_dir / "dataset.csv",
             out_dir=artifacts_dir,
             seed=args.seed,
-            target_sha256=target_sha,
         )
         if args.command == "train":
             print(json.dumps({k: report[k] for k in ("best_model", "train_rows", "test_rows")}, indent=2))

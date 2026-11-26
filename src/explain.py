@@ -13,7 +13,14 @@ from joblib import load
 from sklearn.ensemble import ExtraTreesClassifier, HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
-from .pe_features import FEATURE_DESCRIPTIONS, FEATURE_NAMES, extract_features, human_evidence
+from .pe_features import (
+    FEATURE_DESCRIPTIONS,
+    FEATURE_NAMES,
+    MODEL_FEATURES,
+    NON_MODEL_FEATURES,
+    extract_features,
+    human_evidence,
+)
 
 
 def _prepared(pipeline: Any, frame: pd.DataFrame) -> np.ndarray:
@@ -47,7 +54,7 @@ def explain_file(
     features_result = extract_features(file_path)
     features = features_result["features"]
     evidence = features_result["evidence"]
-    row = pd.DataFrame([[float(features[n]) for n in FEATURE_NAMES]], columns=FEATURE_NAMES)
+    row = pd.DataFrame([[float(features[n]) for n in MODEL_FEATURES]], columns=MODEL_FEATURES)
     x_prepared = _prepared(pipeline, row)
     probabilities = pipeline.predict_proba(row)[0]
     positive_idx = list(pipeline.classes_).index(1)
@@ -59,24 +66,24 @@ def explain_file(
     try:
         if isinstance(clf, (RandomForestClassifier, ExtraTreesClassifier, HistGradientBoostingClassifier)):
             explainer = shap.TreeExplainer(clf)
-            values = _positive_shap(explainer.shap_values(x_prepared), len(FEATURE_NAMES))
+            values = _positive_shap(explainer.shap_values(x_prepared), len(MODEL_FEATURES))
             expected = float(np.asarray(explainer.expected_value).reshape(-1)[-1])
         elif isinstance(clf, LogisticRegression):
             explainer = shap.LinearExplainer(clf, train_prepared)
-            values = _positive_shap(explainer.shap_values(x_prepared), len(FEATURE_NAMES))
+            values = _positive_shap(explainer.shap_values(x_prepared), len(MODEL_FEATURES))
             expected = float(np.asarray(explainer.expected_value).reshape(-1)[-1])
         else:
             raise TypeError(f"No SHAP explainer configured for {type(clf).__name__}")
         explainer_kind = type(explainer).__name__
     except Exception as exc:  # keep prediction usable even if SHAP cannot run
-        values = np.zeros(len(FEATURE_NAMES))
+        values = np.zeros(len(MODEL_FEATURES))
         expected = float("nan")
         explainer_kind = f"unavailable ({type(exc).__name__}: {exc})"
 
     order = np.argsort(-np.abs(values))[:top_n]
     attributions = []
     for idx in order:
-        name = FEATURE_NAMES[idx]
+        name = MODEL_FEATURES[idx]
         attributions.append({
             "feature": name,
             "value": round(float(row.iloc[0, idx]), 4),
@@ -97,11 +104,16 @@ def explain_file(
         "baseline_log_odds": None if np.isnan(expected) else round(expected, 5),
         "top_attributions": attributions,
         "feature_count": len(FEATURE_NAMES),
+        "model_feature_count": len(MODEL_FEATURES),
+        "excluded_from_model": list(NON_MODEL_FEATURES),
         "feature_schema": [
             {
                 "name": name,
                 "value": round(float(features.get(name, 0.0)), 4),
-                "description": FEATURE_DESCRIPTIONS.get(name, name),
+                "description": (
+                    FEATURE_DESCRIPTIONS.get(name, name)
+                    + (" (excluded from model: collection artifact)" if name in NON_MODEL_FEATURES else "")
+                ),
             }
             for name in FEATURE_NAMES
         ],
@@ -109,15 +121,13 @@ def explain_file(
         "raw_evidence": {
             "section_names": evidence.get("section_names", []),
             "imported_dlls": evidence.get("imported_dlls", []),
-            "top_import_categories": evidence.get("top_import_categories", []),
-            "string_indicators": evidence.get("string_indicators", {}),
-            "overlay_bytes": evidence.get("overlay_bytes", 0),
             "notes": evidence.get("notes", []),
         },
         "interpretation_note": (
             "A positive SHAP value raises the model's malware score relative to the "
             "baseline; a negative value lowers it. Attributions explain this model "
-            "on this synthetic dataset, not ground-truth maliciousness."
+            "on the labelled ficheiro_final.csv corpus, not ground-truth maliciousness. "
+            "creation_time and Permissions are reported but excluded as collection artifacts."
         ),
     }
 

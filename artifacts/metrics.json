@@ -1,166 +1,170 @@
 {
-  "best_model": "random_forest",
+  "best_model": "hist_gradient_boosting",
   "selection_criterion": "highest 5-fold cross-validated F1 on the training split",
-  "target_sha256": "3f071f4eeb4dd0a339ce444c810b1bfb7e4075831ddd7810fe0bdfe17de41cbd",
-  "train_rows": 320,
-  "test_rows": 81,
+  "train_rows": 989,
+  "test_rows": 248,
+  "model_feature_count": 25,
+  "excluded_from_model": [
+    "creation_time",
+    "Permissions"
+  ],
   "models": {
     "majority_baseline": {
       "cv": {
-        "accuracy_mean": 0.5125,
-        "accuracy_std": 0.0063,
-        "f1_mean": 0.6777,
-        "f1_std": 0.0055,
+        "accuracy_mean": 0.5683,
+        "accuracy_std": 0.0023,
+        "f1_mean": 0.0,
+        "f1_std": 0.0,
         "roc_auc_mean": 0.5
       },
       "test": {
-        "accuracy": 0.4444,
-        "f1": 0.6154,
-        "precision": 0.4444,
-        "recall": 1.0,
+        "accuracy": 0.5685,
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
         "roc_auc": 0.5,
         "confusion_matrix": {
-          "tn": 0,
-          "fp": 45,
-          "fn": 0,
-          "tp": 36
+          "tn": 141,
+          "fp": 0,
+          "fn": 107,
+          "tp": 0
         },
-        "false_positive_rate": 1.0,
-        "false_positive_count": 45
+        "false_positive_rate": 0.0,
+        "false_positive_count": 0
       },
-      "fit_seconds": 0.055,
+      "fit_seconds": 0.056,
       "inference": {
-        "batch_seconds_median": 0.000876,
-        "per_sample_ms_batch": 0.0108,
-        "per_sample_ms_single": 1.2596,
-        "samples_timed": 81
+        "batch_seconds_median": 0.000618,
+        "per_sample_ms_batch": 0.0025,
+        "per_sample_ms_single": 0.8557,
+        "samples_timed": 248
       }
     },
     "logistic_regression": {
       "cv": {
-        "accuracy_mean": 0.9563,
-        "accuracy_std": 0.025,
-        "f1_mean": 0.956,
-        "f1_std": 0.0262,
-        "roc_auc_mean": 0.9761
+        "accuracy_mean": 0.9495,
+        "accuracy_std": 0.0219,
+        "f1_mean": 0.9389,
+        "f1_std": 0.0279,
+        "roc_auc_mean": 0.9849
       },
       "test": {
-        "accuracy": 0.9506,
-        "f1": 0.9429,
-        "precision": 0.9706,
-        "recall": 0.9167,
-        "roc_auc": 0.9957,
+        "accuracy": 0.9516,
+        "f1": 0.9439,
+        "precision": 0.9439,
+        "recall": 0.9439,
+        "roc_auc": 0.9829,
         "confusion_matrix": {
-          "tn": 44,
-          "fp": 1,
-          "fn": 3,
-          "tp": 33
+          "tn": 135,
+          "fp": 6,
+          "fn": 6,
+          "tp": 101
         },
-        "false_positive_rate": 0.0222,
-        "false_positive_count": 1
+        "false_positive_rate": 0.0426,
+        "false_positive_count": 6
       },
-      "fit_seconds": 0.072,
+      "fit_seconds": 0.09,
       "inference": {
-        "batch_seconds_median": 0.001267,
-        "per_sample_ms_batch": 0.0156,
-        "per_sample_ms_single": 1.5347,
-        "samples_timed": 81
+        "batch_seconds_median": 0.001053,
+        "per_sample_ms_batch": 0.0042,
+        "per_sample_ms_single": 1.083,
+        "samples_timed": 248
       }
     },
     "random_forest": {
       "cv": {
-        "accuracy_mean": 0.975,
-        "accuracy_std": 0.0159,
-        "f1_mean": 0.9752,
-        "f1_std": 0.0158,
-        "roc_auc_mean": 0.9957
+        "accuracy_mean": 0.9595,
+        "accuracy_std": 0.0085,
+        "f1_mean": 0.9528,
+        "f1_std": 0.01,
+        "roc_auc_mean": 0.9939
       },
       "test": {
-        "accuracy": 0.963,
-        "f1": 0.9565,
-        "precision": 1.0,
-        "recall": 0.9167,
-        "roc_auc": 1.0,
+        "accuracy": 0.9758,
+        "f1": 0.9725,
+        "precision": 0.955,
+        "recall": 0.9907,
+        "roc_auc": 0.9993,
         "confusion_matrix": {
-          "tn": 45,
-          "fp": 0,
-          "fn": 3,
-          "tp": 33
+          "tn": 136,
+          "fp": 5,
+          "fn": 1,
+          "tp": 106
         },
-        "false_positive_rate": 0.0,
-        "false_positive_count": 0
+        "false_positive_rate": 0.0355,
+        "false_positive_count": 5
       },
-      "fit_seconds": 3.485,
+      "fit_seconds": 3.697,
       "inference": {
-        "batch_seconds_median": 0.045085,
-        "per_sample_ms_batch": 0.5566,
-        "per_sample_ms_single": 49.9155,
-        "samples_timed": 81
+        "batch_seconds_median": 0.050465,
+        "per_sample_ms_batch": 0.2035,
+        "per_sample_ms_single": 49.0215,
+        "samples_timed": 248
       }
     },
     "extra_trees": {
       "cv": {
-        "accuracy_mean": 0.9688,
-        "accuracy_std": 0.014,
-        "f1_mean": 0.9685,
-        "f1_std": 0.0143,
-        "roc_auc_mean": 0.9932
+        "accuracy_mean": 0.9596,
+        "accuracy_std": 0.0106,
+        "f1_mean": 0.9519,
+        "f1_std": 0.013,
+        "roc_auc_mean": 0.993
       },
       "test": {
-        "accuracy": 0.963,
-        "f1": 0.9565,
-        "precision": 1.0,
-        "recall": 0.9167,
-        "roc_auc": 0.9988,
+        "accuracy": 0.9839,
+        "f1": 0.9813,
+        "precision": 0.9813,
+        "recall": 0.9813,
+        "roc_auc": 0.9995,
         "confusion_matrix": {
-          "tn": 45,
-          "fp": 0,
-          "fn": 3,
-          "tp": 33
+          "tn": 139,
+          "fp": 2,
+          "fn": 2,
+          "tp": 105
         },
-        "false_positive_rate": 0.0,
-        "false_positive_count": 0
+        "false_positive_rate": 0.0142,
+        "false_positive_count": 2
       },
-      "fit_seconds": 2.186,
+      "fit_seconds": 2.232,
       "inference": {
-        "batch_seconds_median": 0.04943,
-        "per_sample_ms_batch": 0.6102,
-        "per_sample_ms_single": 49.6622,
-        "samples_timed": 81
+        "batch_seconds_median": 0.047379,
+        "per_sample_ms_batch": 0.191,
+        "per_sample_ms_single": 49.5033,
+        "samples_timed": 248
       }
     },
     "hist_gradient_boosting": {
       "cv": {
-        "accuracy_mean": 0.9656,
-        "accuracy_std": 0.0303,
-        "f1_mean": 0.9653,
-        "f1_std": 0.0312,
-        "roc_auc_mean": 0.9978
+        "accuracy_mean": 0.9636,
+        "accuracy_std": 0.0125,
+        "f1_mean": 0.9573,
+        "f1_std": 0.0149,
+        "roc_auc_mean": 0.9947
       },
       "test": {
-        "accuracy": 0.9877,
-        "f1": 0.9859,
-        "precision": 1.0,
-        "recall": 0.9722,
-        "roc_auc": 0.9994,
+        "accuracy": 0.9798,
+        "f1": 0.977,
+        "precision": 0.9636,
+        "recall": 0.9907,
+        "roc_auc": 0.9986,
         "confusion_matrix": {
-          "tn": 45,
-          "fp": 0,
+          "tn": 137,
+          "fp": 4,
           "fn": 1,
-          "tp": 35
+          "tp": 106
         },
-        "false_positive_rate": 0.0,
-        "false_positive_count": 0
+        "false_positive_rate": 0.0284,
+        "false_positive_count": 4
       },
-      "fit_seconds": 0.588,
+      "fit_seconds": 0.775,
       "inference": {
-        "batch_seconds_median": 0.002167,
-        "per_sample_ms_batch": 0.0268,
-        "per_sample_ms_single": 2.6968,
-        "samples_timed": 81
+        "batch_seconds_median": 0.002451,
+        "per_sample_ms_batch": 0.0099,
+        "per_sample_ms_single": 2.375,
+        "samples_timed": 248
       }
     }
   },
   "model_path": "artifacts/model.joblib",
-  "disclaimer": "Scores are measured on a synthetic feature-space dataset. They are NOT estimates of real-world malware detection performance."
+  "disclaimer": "Scores are measured on the labelled ficheiro_final.csv corpus (train/test split only). They describe this dataset, not real-world malware detection performance."
 }

@@ -25,7 +25,7 @@ from sklearn.model_selection import StratifiedKFold, cross_validate
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from .pe_features import FEATURE_NAMES
+from .pe_features import MODEL_FEATURES, NON_MODEL_FEATURES
 
 
 def make_pipelines(seed: int = 42) -> dict[str, Pipeline]:
@@ -61,7 +61,7 @@ def make_pipelines(seed: int = 42) -> dict[str, Pipeline]:
 
 def _xy(frame: pd.DataFrame, split: str) -> tuple[pd.DataFrame, np.ndarray]:
     subset = frame[frame["split"] == split]
-    return subset[FEATURE_NAMES].astype(float), subset["label"].astype(int).to_numpy()
+    return subset[MODEL_FEATURES].astype(float), subset["label"].astype(int).to_numpy()
 
 
 def measure_inference_time(pipeline: Pipeline, x_test: pd.DataFrame, repeats: int = 3) -> dict[str, float]:
@@ -89,7 +89,6 @@ def train_and_evaluate(
     csv_path: str | Path,
     out_dir: str | Path,
     seed: int = 42,
-    target_sha256: str | None = None,
 ) -> dict[str, Any]:
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -143,7 +142,7 @@ def train_and_evaluate(
     best_pipeline = pipelines[best_name].fit(x_train, y_train)
     model_path = out_dir / "model.joblib"
     dump(
-        {"pipeline": best_pipeline, "name": best_name, "features": FEATURE_NAMES,
+        {"pipeline": best_pipeline, "name": best_name, "features": MODEL_FEATURES,
          "seed": seed, "x_train": x_train, "train_columns": list(x_train.columns)},
         model_path,
     )
@@ -151,14 +150,16 @@ def train_and_evaluate(
     report = {
         "best_model": best_name,
         "selection_criterion": "highest 5-fold cross-validated F1 on the training split",
-        "target_sha256": target_sha256,
         "train_rows": int(len(x_train)),
         "test_rows": int(len(x_test)),
+        "model_feature_count": len(MODEL_FEATURES),
+        "excluded_from_model": list(NON_MODEL_FEATURES),
         "models": results,
         "model_path": str(model_path),
         "disclaimer": (
-            "Scores are measured on a synthetic feature-space dataset. "
-            "They are NOT estimates of real-world malware detection performance."
+            "Scores are measured on the labelled ficheiro_final.csv corpus "
+            "(train/test split only). They describe this dataset, not "
+            "real-world malware detection performance."
         ),
     }
     (out_dir / "metrics.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
